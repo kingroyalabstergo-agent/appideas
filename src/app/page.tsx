@@ -45,26 +45,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-5 py-8 pb-24">
+    <div className="max-w-lg mx-auto px-6 py-10 pb-28">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-10">
         <h1 className="text-3xl font-semibold tracking-tight text-black">AppIdeas</h1>
         <p className="text-accent-light text-sm mt-1">validate before you build</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-2 mb-8">
-        {[
-          { label: 'Total', value: stats.total },
-          { label: 'Validated', value: stats.validated },
-          { label: 'Building', value: stats.building },
-          { label: 'Rejected', value: stats.rejected },
-        ].map(s => (
-          <div key={s.label} className="bg-white rounded-2xl p-3 border border-warm-border">
-            <div className="text-2xl font-bold text-black">{s.value}</div>
-            <div className="text-[11px] text-accent-lighter mt-0.5">{s.label}</div>
-          </div>
-        ))}
       </div>
 
       {/* Ideas List */}
@@ -76,7 +61,7 @@ export default function Dashboard() {
           <p className="text-sm">Tap + to add your first idea</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {ideas.map(idea => (
             <Link href={`/idea/${idea.id}`} key={idea.id}>
               <div className="bg-white rounded-2xl p-5 border border-warm-border active:scale-[0.98] transition-transform cursor-pointer">
