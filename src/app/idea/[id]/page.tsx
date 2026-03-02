@@ -6,32 +6,30 @@ import { supabase, AppIdea } from '@/lib/supabase'
 import Link from 'next/link'
 
 const statuses = ['idea', 'researching', 'validated', 'building', 'rejected'] as const
-const statusColors: Record<string, string> = {
-  idea: 'bg-status-idea',
-  researching: 'bg-status-researching',
-  validated: 'bg-status-validated',
-  building: 'bg-status-building',
-  rejected: 'bg-status-rejected',
+const statusBg: Record<string, string> = {
+  idea: '#8B7B6E', researching: '#C4A24E', validated: '#6B8E5A', building: '#5A7B8E', rejected: '#B85C5C',
 }
 
 function ScoreBarLabeled({ label, score }: { label: string; score: number }) {
-  const color = score >= 70 ? 'bg-score-green' : score >= 40 ? 'bg-score-yellow' : 'bg-score-red'
+  const color = score >= 70 ? '#6B8E5A' : score >= 40 ? '#C4A24E' : '#B85C5C'
   return (
-    <div className="mb-3">
-      <div className="flex justify-between text-xs mb-1">
-        <span className="text-accent-light">{label}</span>
-        <span className="font-medium text-accent tabular-nums">{score}</span>
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+        <span style={{ color: '#8B7B6E' }}>{label}</span>
+        <span style={{ fontWeight: 600, color: '#6B5B4E' }}>{score}</span>
       </div>
-      <div className="w-full h-2 bg-cream-dark rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${score}%` }} />
+      <div style={{ width: '100%', height: 6, backgroundColor: '#F5F0E8', borderRadius: 99, overflow: 'hidden' }}>
+        <div style={{ height: '100%', borderRadius: 99, backgroundColor: color, width: `${score}%`, transition: 'all 0.3s' }} />
       </div>
     </div>
   )
 }
 
+const card = { backgroundColor: '#fff', borderRadius: 16, padding: 20, border: '1px solid #E8E0D4', marginBottom: 16 }
+const sectionTitle = { fontSize: 11, fontWeight: 600 as const, color: '#8B7B6E', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 10 }
+
 export default function IdeaDetail() {
   const params = useParams()
-  const router = useRouter()
   const [idea, setIdea] = useState<AppIdea | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -39,15 +37,8 @@ export default function IdeaDetail() {
   const [researching, setResearching] = useState(false)
 
   async function load() {
-    const { data } = await supabase
-      .from('app_ideas')
-      .select('*')
-      .eq('id', params.id)
-      .single()
-    if (data) {
-      setIdea(data)
-      setNotes(data.notes || '')
-    }
+    const { data } = await supabase.from('app_ideas').select('*').eq('id', params.id).single()
+    if (data) { setIdea(data); setNotes(data.notes || '') }
     setLoading(false)
   }
 
@@ -60,127 +51,103 @@ export default function IdeaDetail() {
 
   async function saveNotes() {
     await supabase.from('app_ideas').update({ notes, updated_at: new Date().toISOString() }).eq('id', params.id)
-    setEditing(false)
-    load()
+    setEditing(false); load()
   }
 
   async function doResearch() {
     if (!idea) return
     setResearching(true)
     try {
-      const res = await fetch('/api/research', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: idea.id, name: idea.name, description: idea.description, category: idea.app_store_category }),
-      })
+      const res = await fetch('/api/research', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: idea.id, name: idea.name, description: idea.description, category: idea.app_store_category }) })
       if (res.ok) await load()
     } catch (e) { console.error(e) }
     setResearching(false)
   }
 
-  if (loading) return <div className="max-w-lg mx-auto px-5 py-8 text-accent-light">Loading...</div>
-  if (!idea) return <div className="max-w-lg mx-auto px-5 py-8 text-accent-light">Not found</div>
+  if (loading) return <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 24px', color: '#8B7B6E' }}>Loading...</div>
+  if (!idea) return <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 24px', color: '#8B7B6E' }}>Not found</div>
 
   return (
-    <div className="max-w-lg mx-auto px-5 py-8 pb-24">
-      {/* Back */}
-      <Link href="/" className="text-accent-light text-sm hover:text-accent mb-6 inline-block">← Back</Link>
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 24px 120px' }}>
+      <Link href="/" style={{ fontSize: 14, color: '#8B7B6E', textDecoration: 'none', display: 'inline-block', marginBottom: 24 }}>← Back</Link>
 
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-2xl font-semibold text-black">{idea.name}</h1>
-          {idea.collab && (
-            <span className="text-[10px] text-accent-light border border-warm-border rounded-full px-2 py-0.5">w/ {idea.collab}</span>
-          )}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: '#1a1a1a' }}>{idea.name}</h1>
+          {idea.collab && <span style={{ fontSize: 10, color: '#A89888', backgroundColor: '#F5F0E8', borderRadius: 99, padding: '2px 8px' }}>w/ {idea.collab}</span>}
         </div>
-        <p className="text-sm text-accent-light">{idea.app_store_category}</p>
+        <p style={{ fontSize: 13, color: '#8B7B6E' }}>{idea.app_store_category}</p>
       </div>
 
       {/* Status */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
         {statuses.map(s => (
-          <button
-            key={s}
-            onClick={() => updateStatus(s)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
-              idea.status === s
-                ? `${statusColors[s]} text-white border-transparent`
-                : 'border-warm-border text-accent-light hover:border-accent-light'
-            }`}
-          >
-            {s}
-          </button>
+          <button key={s} onClick={() => updateStatus(s)} style={{
+            fontSize: 12, padding: '6px 14px', borderRadius: 99, border: idea.status === s ? 'none' : '1px solid #E8E0D4',
+            backgroundColor: idea.status === s ? statusBg[s] : 'transparent',
+            color: idea.status === s ? '#fff' : '#8B7B6E', cursor: 'pointer',
+          }}>{s}</button>
         ))}
       </div>
 
       {/* Description */}
-      <div className="bg-white rounded-xl p-4 border border-warm-border mb-4">
-        <h2 className="text-xs font-medium text-accent-light uppercase tracking-wide mb-2">Description</h2>
-        <p className="text-sm text-black leading-relaxed">{idea.description}</p>
+      <div style={card}>
+        <h2 style={sectionTitle}>Description</h2>
+        <p style={{ fontSize: 14, color: '#1a1a1a', lineHeight: 1.6 }}>{idea.description}</p>
       </div>
 
       {/* Killer Feature */}
-      <div className="bg-white rounded-xl p-4 border border-warm-border mb-4">
-        <h2 className="text-xs font-medium text-accent-light uppercase tracking-wide mb-2">Killer Feature</h2>
-        <p className="text-sm text-black font-medium">{idea.killer_feature}</p>
-        {idea.secondary_features && idea.secondary_features.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+      <div style={card}>
+        <h2 style={sectionTitle}>Killer Feature</h2>
+        <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>{idea.killer_feature}</p>
+        {idea.secondary_features?.length > 0 && (
+          <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {idea.secondary_features.map((f, i) => (
-              <span key={i} className="text-[11px] bg-cream-dark text-accent px-2 py-0.5 rounded-full">{f}</span>
+              <span key={i} style={{ fontSize: 11, backgroundColor: '#F5F0E8', color: '#6B5B4E', padding: '3px 10px', borderRadius: 99 }}>{f}</span>
             ))}
           </div>
         )}
       </div>
 
       {/* Scores */}
-      <div className="bg-white rounded-xl p-4 border border-warm-border mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs font-medium text-accent-light uppercase tracking-wide">Scores</h2>
-          <span className="text-lg font-semibold text-black">{idea.validation_score}</span>
+      <div style={card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h2 style={{ ...sectionTitle, marginBottom: 0 }}>Scores</h2>
+          <span style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a' }}>{idea.validation_score}</span>
         </div>
         <ScoreBarLabeled label="Trend" score={idea.trend_score} />
-        <ScoreBarLabeled label="Ease" score={idea.ease_score} />
+        <ScoreBarLabeled label="Ease of Build" score={idea.ease_score} />
         <ScoreBarLabeled label="Monetization" score={idea.monetization_score} />
-        {idea.market_size && (
-          <div className="mt-2 text-xs text-accent-light">Market: {idea.market_size}</div>
-        )}
-        {idea.suggested_pricing && (
-          <div className="text-xs text-accent-light">Pricing: {idea.suggested_pricing}</div>
-        )}
+        {idea.market_size && <div style={{ fontSize: 12, color: '#8B7B6E', marginTop: 8 }}>Market: {idea.market_size}</div>}
+        {idea.suggested_pricing && <div style={{ fontSize: 15, fontWeight: 600, color: '#6B5B4E', marginTop: 8 }}>{idea.suggested_pricing}</div>}
       </div>
 
-      {/* Research Button */}
-      <button
-        onClick={doResearch}
-        disabled={researching}
-        className="w-full bg-accent text-white text-sm font-medium py-3 rounded-xl mb-4 hover:bg-accent-light transition-colors disabled:opacity-50 cursor-pointer"
-      >
-        {researching ? 'Researching...' : '🔍 Research Competitors'}
-      </button>
+      {/* Research */}
+      <button onClick={doResearch} disabled={researching} style={{
+        width: '100%', backgroundColor: '#6B5B4E', color: '#fff', fontSize: 14, fontWeight: 500,
+        padding: '14px 0', borderRadius: 14, border: 'none', cursor: 'pointer', marginBottom: 16,
+        opacity: researching ? 0.5 : 1,
+      }}>{researching ? 'Researching...' : '🔍 Research Competitors'}</button>
 
       {/* Competitors */}
-      {idea.competitors && idea.competitors.length > 0 && (
-        <div className="bg-white rounded-xl p-4 border border-warm-border mb-4">
-          <h2 className="text-xs font-medium text-accent-light uppercase tracking-wide mb-3">
-            Competitors ({idea.competitor_count})
-          </h2>
-          <div className="space-y-3">
+      {idea.competitors?.length > 0 && (
+        <div style={card}>
+          <h2 style={sectionTitle}>Competitors ({idea.competitor_count})</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {idea.competitors.map((c, i) => (
-              <div key={i} className="border border-warm-border rounded-lg p-3">
-                <div className="flex justify-between items-start">
+              <div key={i} style={{ border: '1px solid #E8E0D4', borderRadius: 12, padding: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <div>
-                    <p className="text-sm font-medium text-black">{c.name}</p>
-                    <p className="text-[11px] text-accent-light">{c.downloads} downloads</p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>{c.name}</p>
+                    <p style={{ fontSize: 11, color: '#8B7B6E' }}>{c.downloads} downloads</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-black">⭐ {c.rating}</p>
-                    <p className="text-[11px] text-accent-light">{c.pricing}</p>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>⭐ {c.rating}</p>
+                    <p style={{ fontSize: 11, color: '#8B7B6E' }}>{c.pricing}</p>
                   </div>
                 </div>
-                {c.revenue_estimate && (
-                  <p className="text-[11px] text-accent-light mt-1">Est. revenue: {c.revenue_estimate}</p>
-                )}
+                {c.revenue_estimate && <p style={{ fontSize: 11, color: '#A89888', marginTop: 6 }}>Est. revenue: {c.revenue_estimate}</p>}
               </div>
             ))}
           </div>
@@ -188,21 +155,20 @@ export default function IdeaDetail() {
       )}
 
       {/* Notes */}
-      <div className="bg-white rounded-xl p-4 border border-warm-border mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-medium text-accent-light uppercase tracking-wide">Notes</h2>
-          <button onClick={() => editing ? saveNotes() : setEditing(true)} className="text-xs text-accent hover:text-accent-light cursor-pointer">
+      <div style={card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <h2 style={{ ...sectionTitle, marginBottom: 0 }}>Notes</h2>
+          <button onClick={() => editing ? saveNotes() : setEditing(true)} style={{ fontSize: 12, color: '#6B5B4E', background: 'none', border: 'none', cursor: 'pointer' }}>
             {editing ? 'Save' : 'Edit'}
           </button>
         </div>
         {editing ? (
-          <textarea
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            className="w-full text-sm border border-warm-border rounded-lg p-2 bg-cream min-h-[80px] outline-none focus:border-accent resize-none"
-          />
+          <textarea value={notes} onChange={e => setNotes(e.target.value)} style={{
+            width: '100%', fontSize: 14, border: '1px solid #E8E0D4', borderRadius: 10, padding: 10,
+            backgroundColor: '#FFFDF7', minHeight: 80, outline: 'none', resize: 'none', fontFamily: 'inherit',
+          }} />
         ) : (
-          <p className="text-sm text-accent-light whitespace-pre-wrap">{idea.notes || 'No notes yet'}</p>
+          <p style={{ fontSize: 14, color: '#8B7B6E', whiteSpace: 'pre-wrap' }}>{idea.notes || 'No notes yet'}</p>
         )}
       </div>
     </div>

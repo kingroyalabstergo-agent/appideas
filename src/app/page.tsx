@@ -97,7 +97,7 @@ export default function Dashboard() {
                   <span style={{ fontSize: 14, fontWeight: 600, color: '#6B5B4E', width: 28, textAlign: 'right' as const }}>{idea.validation_score}</span>
                 </div>
                 {idea.suggested_pricing && (
-                  <div style={{ marginTop: 10, fontSize: 11, color: '#A89888' }}>{idea.suggested_pricing}</div>
+                  <div style={{ marginTop: 12, fontSize: 14, fontWeight: 600, color: '#6B5B4E' }}>{idea.suggested_pricing}</div>
                 )}
               </div>
             </Link>
