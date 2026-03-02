@@ -5,18 +5,18 @@ import { supabase, AppIdea } from '@/lib/supabase'
 import Link from 'next/link'
 
 const statusColors: Record<string, string> = {
-  idea: 'bg-status-idea',
-  researching: 'bg-status-researching',
-  validated: 'bg-status-validated',
-  building: 'bg-status-building',
-  rejected: 'bg-status-rejected',
+  idea: '#8B7B6E',
+  researching: '#C4A24E',
+  validated: '#6B8E5A',
+  building: '#5A7B8E',
+  rejected: '#B85C5C',
 }
 
 function ScoreBar({ score }: { score: number }) {
-  const color = score >= 70 ? 'bg-score-green' : score >= 40 ? 'bg-score-yellow' : 'bg-score-red'
+  const color = score >= 70 ? '#6B8E5A' : score >= 40 ? '#C4A24E' : '#B85C5C'
   return (
-    <div className="w-full h-1.5 bg-cream-dark rounded-full overflow-hidden">
-      <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${score}%` }} />
+    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#F5F0E8' }}>
+      <div className="h-full rounded-full transition-all" style={{ width: `${score}%`, backgroundColor: color }} />
     </div>
   )
 }
@@ -37,59 +37,67 @@ export default function Dashboard() {
     load()
   }, [])
 
-  const stats = {
-    total: ideas.length,
-    validated: ideas.filter(i => i.status === 'validated').length,
-    building: ideas.filter(i => i.status === 'building').length,
-    rejected: ideas.filter(i => i.status === 'rejected').length,
-  }
-
   return (
-    <div className="max-w-lg mx-auto px-6 py-10 pb-28">
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '40px 24px 120px' }}>
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-semibold tracking-tight text-black">AppIdeas</h1>
-        <p className="text-accent-light text-sm mt-1">validate before you build</p>
+      <div style={{ marginBottom: 40 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', color: '#1a1a1a' }}>AppIdeas</h1>
+        <p style={{ fontSize: 14, color: '#8B7B6E', marginTop: 4 }}>validate before you build</p>
       </div>
 
       {/* Ideas List */}
       {loading ? (
-        <div className="text-center text-accent-light py-12">Loading...</div>
+        <div style={{ textAlign: 'center', color: '#8B7B6E', padding: '48px 0' }}>Loading...</div>
       ) : ideas.length === 0 ? (
-        <div className="text-center text-accent-light py-12">
-          <p className="text-lg mb-1">No ideas yet</p>
-          <p className="text-sm">Tap + to add your first idea</p>
+        <div style={{ textAlign: 'center', color: '#8B7B6E', padding: '48px 0' }}>
+          <p style={{ fontSize: 18, marginBottom: 4 }}>No ideas yet</p>
+          <p style={{ fontSize: 14 }}>Tap + to add your first idea</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {ideas.map(idea => (
-            <Link href={`/idea/${idea.id}`} key={idea.id}>
-              <div className="bg-white rounded-2xl p-5 border border-warm-border active:scale-[0.98] transition-transform cursor-pointer">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <h3 className="font-semibold text-black text-[15px]">{idea.name}</h3>
+            <Link href={`/idea/${idea.id}`} key={idea.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div style={{
+                backgroundColor: '#fff',
+                borderRadius: 16,
+                padding: '20px',
+                border: '1px solid #E8E0D4',
+                cursor: 'pointer',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <h3 style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a' }}>{idea.name}</h3>
                       {idea.collab && (
-                        <span className="text-[10px] text-accent-lighter bg-cream-dark rounded-full px-2 py-0.5 shrink-0">
+                        <span style={{ fontSize: 10, color: '#A89888', backgroundColor: '#F5F0E8', borderRadius: 99, padding: '2px 8px' }}>
                           w/ {idea.collab}
                         </span>
                       )}
                     </div>
-                    <p className="text-[13px] text-accent-light">{idea.killer_feature}</p>
+                    <p style={{ fontSize: 13, color: '#8B7B6E' }}>{idea.killer_feature}</p>
                   </div>
-                  <span className={`${statusColors[idea.status]} text-white text-[10px] font-medium px-2.5 py-1 rounded-full ml-3 shrink-0`}>
+                  <span style={{
+                    backgroundColor: statusColors[idea.status] || '#8B7B6E',
+                    color: '#fff',
+                    fontSize: 10,
+                    fontWeight: 500,
+                    padding: '4px 10px',
+                    borderRadius: 99,
+                    marginLeft: 12,
+                    whiteSpace: 'nowrap',
+                  }}>
                     {idea.status}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ flex: 1 }}>
                     <ScoreBar score={idea.validation_score} />
                   </div>
-                  <span className="text-sm font-semibold text-accent tabular-nums w-7 text-right">{idea.validation_score}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#6B5B4E', width: 28, textAlign: 'right' as const }}>{idea.validation_score}</span>
                 </div>
                 {idea.suggested_pricing && (
-                  <div className="mt-2.5 text-[11px] text-accent-lighter">{idea.suggested_pricing}</div>
+                  <div style={{ marginTop: 10, fontSize: 11, color: '#A89888' }}>{idea.suggested_pricing}</div>
                 )}
               </div>
             </Link>
@@ -99,7 +107,22 @@ export default function Dashboard() {
 
       {/* FAB */}
       <Link href="/add">
-        <div className="fixed bottom-6 right-6 w-14 h-14 bg-accent text-white rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-accent-light transition-colors cursor-pointer">
+        <div style={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          width: 56,
+          height: 56,
+          backgroundColor: '#6B5B4E',
+          color: '#fff',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 28,
+          boxShadow: '0 4px 12px rgba(107,91,78,0.3)',
+          cursor: 'pointer',
+        }}>
           +
         </div>
       </Link>
